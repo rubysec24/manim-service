@@ -1,43 +1,32 @@
-# Minimal Manim Dockerfile
-FROM python:3.9-slim
+FROM python:3.9
 
-# Install dependencies in steps
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    gcc \
-    g++ \
-    make \
+# Install system dependencies for Manim
+RUN apt-get update && apt-get install -y \
     ffmpeg \
+    texlive \
+    texlive-latex-extra \
+    texlive-fonts-extra \
+    texlive-science \
     libcairo2-dev \
     libpango1.0-dev \
     pkg-config \
     python3-dev \
+    build-essential \
+    libgirepository1.0-dev \
+    gir1.2-pango-1.0 \
     && rm -rf /var/lib/apt/lists/*
-
-# Install LaTeX separately (optional, can be removed to save space)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    texlive-latex-base \
-    texlive-fonts-recommended \
-    dvipng \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Python packages
-RUN pip install --no-cache-dir \
-    fastapi==0.104.1 \
-    uvicorn==0.24.0 \
-    manim==0.18.0 \
-    pydantic==2.5.0 \
-    python-multipart==0.0.6
-
-# Clean up build dependencies
-RUN apt-get remove -y gcc g++ make && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the service file
 COPY main.py .
 
+# Expose port
 EXPOSE 8001
+
+# Run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
