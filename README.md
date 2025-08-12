@@ -1,6 +1,7 @@
 # Manim Video Service
 
 Educational video generation service using Manim for mathematical animations.
+Last updated: August 12, 2025
 
 ## Deploy to Railway
 
