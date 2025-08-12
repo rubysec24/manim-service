@@ -1,28 +1,37 @@
 # Minimal Manim Dockerfile
 FROM python:3.9-slim
 
-# Tek adımda tüm dependencies
+# Install dependencies in steps
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    # Build tools (sadece install için)
-    gcc g++ \
-    # Manim core dependencies
+    gcc \
+    g++ \
+    make \
     ffmpeg \
     libcairo2-dev \
     libpango1.0-dev \
     pkg-config \
-    # Minimal LaTeX (sadece matematik için)
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install LaTeX separately (optional, can be removed to save space)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     texlive-latex-base \
-    texlive-amsfonts \
-    cm-super \
+    texlive-fonts-recommended \
     dvipng \
-    && pip install --no-cache-dir \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python packages
+RUN pip install --no-cache-dir \
     fastapi==0.104.1 \
     uvicorn==0.24.0 \
     manim==0.18.0 \
     pydantic==2.5.0 \
-    python-multipart==0.0.6 \
-    && apt-get remove -y gcc g++ && \
+    python-multipart==0.0.6
+
+# Clean up build dependencies
+RUN apt-get remove -y gcc g++ make && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
